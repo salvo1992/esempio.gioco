@@ -1,6 +1,6 @@
-// Per abilitare AsyncStorage eseguire nel terminale:
+// Per abilitare AsyncStorage:
 // yarn add @react-native-async-storage/async-storage
-// npx pod-install (iOS)
+// npx pod-install
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
@@ -12,7 +12,7 @@ import {
   Dimensions,
   Animated,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Assicurati di aver installato il pacchetto
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 const BASE_POPUP_DURATION = 1500;
@@ -28,14 +28,14 @@ export default function GameScreen({ navigation }) {
   const popupAnim = useRef(new Animated.Value(0)).current;
   const timerRef = useRef(null);
 
-  // Carica best score da AsyncStorage
+  // Carica best score
   useEffect(() => {
     AsyncStorage.getItem('bestScore').then(val => {
       if (val) setBestScore(Number(val));
     });
   }, []);
 
-  // Aggiorna numHoles e difficoltà in base al livello
+  // Aggiorna numero di buche per livello
   useEffect(() => {
     if (level >= 70) setNumHoles(INITIAL_HOLES + 3);
     else if (level >= 30) setNumHoles(INITIAL_HOLES + 2);
@@ -49,19 +49,15 @@ export default function GameScreen({ navigation }) {
     return 1;
   };
 
-  const getPopupDuration = () => {
-    const dur = BASE_POPUP_DURATION - (level - 1) * 50;
-    return Math.max(dur, MIN_POPUP_DURATION);
-  };
+  const getPopupDuration = () => Math.max(BASE_POPUP_DURATION - (level - 1) * 50, MIN_POPUP_DURATION);
 
   const popMoles = () => {
     const count = getSimultaneous();
-    const holes = [];
-    while (holes.length < count) {
-      const idx = Math.floor(Math.random() * numHoles);
-      if (!holes.includes(idx)) holes.push(idx);
+    const holes = new Set();
+    while (holes.size < count) {
+      holes.add(Math.floor(Math.random() * numHoles));
     }
-    setActiveHoles(holes);
+    setActiveHoles([...holes]);
     popupAnim.setValue(0);
 
     Animated.timing(popupAnim, {
@@ -83,8 +79,7 @@ export default function GameScreen({ navigation }) {
   };
 
   const scheduleNext = () => {
-    const delay = Math.max(getPopupDuration(), 500);
-    timerRef.current = setTimeout(popMoles, delay);
+    timerRef.current = setTimeout(popMoles, Math.max(getPopupDuration(), 500));
   };
 
   useEffect(() => {
@@ -92,41 +87,38 @@ export default function GameScreen({ navigation }) {
     return () => clearTimeout(timerRef.current);
   }, [level, numHoles]);
 
-  const hitMole = (idx) => {
+  const hitMole = idx => {
     if (activeHoles.includes(idx)) {
-      const newScore = score + 1;
-      setScore(newScore);
-      if (newScore > bestScore) {
-        setBestScore(newScore);
-        AsyncStorage.setItem('bestScore', String(newScore));
-      }
-      if (newScore % 10 === 0) setLevel(l => l + 1);
-      setActiveHoles(h => h.filter(hole => hole !== idx));
+      setScore(prev => {
+        const newScore = prev + 1;
+        if (newScore > bestScore) {
+          setBestScore(newScore);
+          AsyncStorage.setItem('bestScore', String(newScore));
+        }
+        if (newScore % 10 === 0) setLevel(l => l + 1);
+        return newScore;
+      });
+      setActiveHoles(prev => prev.filter(h => h !== idx));
     }
   };
 
-  const translateY = popupAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [50, 0],
-  });
+  const translateY = popupAnim.interpolate({ inputRange: [0, 1], outputRange: [50, 0] });
 
   return (
     <View style={styles.container}>
-      {/* Background moderno */}
       <View style={styles.background} />
       <View style={styles.hud}>
         <Text style={styles.hudText}>Score: {score}</Text>
         <Text style={styles.hudText}>Level: {level}</Text>
         <Text style={styles.hudText}>Best: {bestScore}</Text>
       </View>
-
       <View style={styles.grid}>
         {Array.from({ length: numHoles }).map((_, idx) => (
           <View key={idx} style={styles.holeWrapper}>
             <Image source={require('../assets/hole.png')} style={styles.hole} />
             {activeHoles.includes(idx) && (
               <Animated.View style={[styles.moleWrapper, { transform: [{ translateY }] }]}>                
-                <TouchableOpacity onPress={() => hitMole(idx)}>
+                <TouchableOpacity onPress={() => hitMole(idx)} activeOpacity={0.8}>
                   <Image source={require('../assets/mole.png')} style={styles.mole} />
                 </TouchableOpacity>
               </Animated.View>
@@ -134,7 +126,6 @@ export default function GameScreen({ navigation }) {
           </View>
         ))}
       </View>
-
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Text style={styles.backText}>Exit</Text>
       </TouchableOpacity>
@@ -144,27 +135,18 @@ export default function GameScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#66a6ff' },
-  background: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-  },
+  background: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.1)' },
   hud: { flexDirection: 'row', justifyContent: 'space-around', padding: 16 },
   hudText: { fontSize: 16, fontWeight: '700', color: '#fff' },
-  grid: {
-    flex: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    padding: 10,
-  },
+  grid: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', alignItems: 'center', padding: 10 },
   holeWrapper: { width: width / 4 - 20, height: width / 4 - 20, alignItems: 'center', justifyContent: 'flex-end' },
   hole: { width: '100%', height: '100%', resizeMode: 'contain' },
-  moleWrapper: { position: 'absolute', bottom: 0, left: '25%' },
+  moleWrapper: { position: 'absolute', bottom: 0, left: 0, right: 0, alignItems: 'center' },
   mole: { width: 50, height: 50, resizeMode: 'contain' },
   backButton: { padding: 12, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.6)' },
   backText: { fontSize: 16, fontWeight: '600', color: '#333' },
 });
+
 
 
 

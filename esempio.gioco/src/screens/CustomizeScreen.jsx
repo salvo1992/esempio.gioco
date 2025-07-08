@@ -1,48 +1,68 @@
 // src/screens/CustomizeScreen.jsx
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  SafeAreaView,
+  ScrollView,
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Animated,
+  TouchableOpacity,
+} from 'react-native';
+import useAnimatedBackground from '../hook/useAnimatedBackground';
 
-export default function CustomizeScreen({ navigation }) {
+// Mock owned items
+const ownedSkins = [
+  { id:'mole_default', name:'Talpa Default', icon: require('../assets/mole.png') },
+];
+const ownedPowerups = [
+  { id:'pu_time', name:'Tempo Extra x2' },
+];
+const subscription = { active: false };
+
+export default function CustomizeScreen() {
+  const bgColor = useAnimatedBackground(['#f3e5f5', '#ce93d8']);
+
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Personalizza</Text>
+      <Animated.View style={[StyleSheet.absoluteFillObject, { backgroundColor: bgColor }]} />
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Skin possedute */}
-        <Text style={styles.sectionTitle}>Le tue Skin</Text>
+        <Text style={styles.header}>Personalizza</Text>
+        <Text style={styles.section}>Le tue Skin</Text>
         <View style={styles.grid}>
-          <View style={styles.item}>
-            <Image source={require('../assets/mole.png')} style={styles.icon} />
-            <Text style={styles.itemText}>Talpa Default</Text>
+          {ownedSkins.map(skin => (
+            <View key={skin.id} style={styles.card}>
+              <Image source={skin.icon} style={styles.icon} />
+              <Text style={styles.name}>{skin.name}</Text>
+            </View>
+          ))}
+        </View>
+        <Text style={styles.section}>Potenziamenti</Text>
+        {ownedPowerups.map(pu => (
+          <View key={pu.id} style={styles.upCard}>
+            <Text style={styles.name}>{pu.name}</Text>
           </View>
-          {/* TODO: skin acquistate */}
-        </View>
-        {/* Potenziamenti posseduti */}
-        <Text style={styles.sectionTitle}>Potenziamenti</Text>
-        <View style={styles.grid}>
-          <View style={styles.item}>
-            <Text style={styles.itemText}>Tempo Extra x2</Text>
-          </View>
-          {/* TODO: upgrades */}
-        </View>
-        {/* Abbonamento */}
-        <Text style={styles.sectionTitle}>Abbonamento</Text>
-        <View style={styles.subscription}>
-          <Text style={styles.itemText}>Rimuovi Pubblicità</Text>
-          {/* TODO: stato abbonamento e pulsante acquisto */}
-        </View>
+        ))}
+        <Text style={styles.section}>Abbonamento</Text>
+        <TouchableOpacity style={[styles.subCard, subscription.active ? styles.subActive : {}]}>           
+          <Text style={styles.name}>{subscription.active ? 'Attivo' : 'Rimuovi Pubblicità'}</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container:{flex:1, backgroundColor:'#fafafa'},
-  header:{fontSize:24,fontWeight:'700',margin:16},
-  content:{paddingHorizontal:16},
-  sectionTitle:{fontSize:18,fontWeight:'600',marginVertical:12},
-  grid:{flexDirection:'row',flexWrap:'wrap',justifyContent:'space-between'},
-  item:{width:'48%',backgroundColor:'#fff',padding:12,marginBottom:12,borderRadius:8,alignItems:'center',elevation:2},
-  icon:{width:64,height:64,marginBottom:8},
-  itemText:{fontSize:14,fontWeight:'500'},
-  subscription:{backgroundColor:'#ffa502',padding:12,borderRadius:8,alignItems:'center',marginVertical:12}
+  container: { flex:1 },
+  content: { padding:16 },
+  header: { fontSize:24, fontWeight:'700', marginBottom:16, color:'#4a148c' },
+  section: { fontSize:18, fontWeight:'600', marginVertical:12, color:'#6a1b9a' },
+  grid: { flexDirection:'row', flexWrap:'wrap', justifyContent:'flex-start' },
+  card: { width:'30%', backgroundColor:'#fff', padding:8, borderRadius:8, alignItems:'center', margin:4, elevation:2 },
+  icon: { width:48, height:48, marginBottom:4 },
+  name: { fontSize:12, fontWeight:'500' },
+  upCard: { backgroundColor:'#fff', padding:8, borderRadius:8, marginBottom:8, elevation:2 },
+  subCard: { backgroundColor:'#fff', padding:12, borderRadius:8, alignItems:'center', marginVertical:12, elevation:2 },
+  subActive: { backgroundColor:'#ce93d8' },
 });

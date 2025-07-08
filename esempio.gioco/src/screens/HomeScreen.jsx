@@ -62,6 +62,10 @@ export default function HomeScreen({ navigation }) {
           <ActionButton icon={require('../assets/icon-register.png')} label="Registrati" onPress={() => navigation.navigate('Register')} color="#1dd1a1" />
           <ActionButton icon={require('../assets/icon-settings.png')} label="Impostazioni" onPress={() => navigation.navigate('Settings')} color="#54a0ff" />
           <ActionButton icon={require('../assets/icon-trophy.png')} label="Best Score" onPress={() => navigation.navigate('BestScore')} color="#f368e0" />
+          <ActionButton icon={require('../assets/icon-shop.png')} label="Shop" onPress={() => navigation.navigate('Shop')} color="#E76F51" />
+           <ActionButton icon={require('../assets/icon-social.png')} label="Social" onPress={() => navigation.navigate('Social')} color="#3D5A80" />
+           <ActionButton icon={require('../assets/icon-customize.png')} label="Personalizza" onPress={() => navigation.navigate('Customize')} color="#2A9D8F" />
+        
         </View>
       </SafeAreaView>
     </Animated.View>

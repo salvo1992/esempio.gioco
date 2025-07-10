@@ -15,7 +15,7 @@ import CustomizeScreen from '../screens/CustomizeScreen';
  
 import {RegisterScreen} from '../screens/AuthAndSettingsScreens/RegisterScreen';
 import {SettingsScreen} from '../screens/AuthAndSettingsScreens/SettingsScreen';
-import {BestScoreScreen} from '../screens/AuthAndSettingsScreens/BestScoreScreen';
+import BestScoreScreen from '../screens/AuthAndSettingsScreens/BestScoreScreen';
 
 const Stack = createNativeStackNavigator();
 

@@ -11,6 +11,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import useAnimatedBackground from '../../hook/useAnimatedBackground';
+import { register, login } from '../../../firebaseConfig';  // o il path giusto al tuo config
 
 export  function LoginScreen({ navigation }) {
   const bgColor = useAnimatedBackground(['#89f7fe', '#66a6ff']);

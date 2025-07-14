@@ -12,6 +12,8 @@ import {
   StyleSheet,
   TextInput,
 } from 'react-native';
+import { register, login } from '../../../firebaseConfig';  // o il path giusto al tuo config
+
 export function RegisterScreen({ navigation }) {
   const bgColor = useAnimatedBackground(['#fad0c4', '#ffd1ff']);
   const [name, setName] = useState('');
